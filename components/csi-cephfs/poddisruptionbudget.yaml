@@ -1,0 +1,13 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ceph-csi-cephfs-provisioner
+  namespace: ceph-csi-cephfs
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: ceph-csi-cephfs
+      component: provisioner
+      release: ceph-csi-cephfs

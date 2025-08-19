@@ -27,6 +27,8 @@ It is recommended to store the CephFS data and metadata in separate pools each.
 ```bash
 ceph osd pool create cephfs_data 128
 ceph osd pool create cephfs_metadata 32
+# create a new cephfs filesystem called cephfs
+# with the last two arguments being the metadata and data pools backing it
 ceph fs new cephfs cephfs_metadata cephfs_data
 ```
 

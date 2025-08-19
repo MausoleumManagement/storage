@@ -1,0 +1,776 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: csi-cephfs
+---
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    heritage: Helm
+    release: csi-cephfs
+  name: cephfs
+parameters:
+  clusterID: 94563514-dd45-48e9-80b0-ba2f058f6d30
+  csi.storage.k8s.io/controller-expand-secret-name: csi-cephfs-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: csi-cephfs
+  csi.storage.k8s.io/node-stage-secret-name: csi-cephfs-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: csi-cephfs
+  csi.storage.k8s.io/provisioner-secret-name: csi-cephfs-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: csi-cephfs
+  encrypted: "false"
+  fsName: cephfs
+provisioner: cephfs.csi.ceph.com
+reclaimPolicy: Delete
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+  namespace: csi-cephfs
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - watch
+  - list
+  - delete
+  - update
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshots/status
+  verbs:
+  - update
+  - patch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotcontents/status
+  verbs:
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshots
+  verbs:
+  - get
+  - list
+  - patch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotcontents
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims/status
+  verbs:
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+subjects:
+- kind: ServiceAccount
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+subjects:
+- kind: ServiceAccount
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+  namespace: csi-cephfs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+subjects:
+- kind: ServiceAccount
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+---
+apiVersion: v1
+data:
+  ceph.conf: |
+    [global]
+      auth_cluster_required = cephx
+      auth_service_required = cephx
+      auth_client_required = cephx
+
+      # ceph-fuse which uses libfuse2 by default has write buffer size of 2KiB
+      # adding 'fuse_big_writes = true' option by default to override this limit
+      # see https://github.com/ceph/ceph-csi/issues/1928
+      fuse_big_writes = true
+  keyring: ""
+kind: ConfigMap
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: ceph-config
+  namespace: csi-cephfs
+---
+apiVersion: v1
+data:
+  config.json: '[{"cephFS":{"radosNamespace":"fsvolumens_nekropolis-csi-cephfs","subvolumeGroup":"k8s"},"clusterID":"94563514-dd45-48e9-80b0-ba2f058f6d30","monitors":["192.168.9.20","192.168.9.21","192.168.9.22"]}]'
+kind: ConfigMap
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: ceph-csi-config
+  namespace: csi-cephfs
+---
+apiVersion: v1
+data:
+  config.json: '{}'
+kind: ConfigMap
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: ceph-csi-encryption-kms-config
+  namespace: csi-cephfs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-cephfs-ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin-http-metrics
+  namespace: csi-cephfs
+spec:
+  ports:
+  - name: http-metrics
+    port: 8080
+    targetPort: 8081
+  selector:
+    app: ceph-csi-cephfs
+    component: nodeplugin
+    release: csi-cephfs
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-cephfs-ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner-http-metrics
+  namespace: csi-cephfs
+spec:
+  ports:
+  - name: http-metrics
+    port: 8080
+    targetPort: 8081
+  selector:
+    app: ceph-csi-cephfs
+    component: provisioner
+    release: csi-cephfs
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: provisioner
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-provisioner
+  namespace: csi-cephfs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ceph-csi-cephfs
+      component: provisioner
+      release: csi-cephfs
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ceph-csi-cephfs
+        chart: ceph-csi-cephfs-3.14.2
+        component: provisioner
+        heritage: Helm
+        release: csi-cephfs
+    spec:
+      containers:
+      - args:
+        - --nodeid=$(NODE_ID)
+        - --type=cephfs
+        - --controllerserver=true
+        - --pidlimit=-1
+        - --endpoint=$(CSI_ENDPOINT)
+        - --v=5
+        - --drivername=$(DRIVER_NAME)
+        - --setmetadata=true
+        - --logslowopinterval=30s
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: DRIVER_NAME
+          value: cephfs.csi.ceph.com
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi-provisioner.sock
+        image: quay.io/cephcsi/cephcsi:v3.14.2
+        imagePullPolicy: IfNotPresent
+        name: csi-cephfsplugin
+        resources: {}
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+        - mountPath: /sys
+          name: host-sys
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /dev
+          name: host-dev
+        - mountPath: /etc/ceph/
+          name: ceph-config
+        - mountPath: /etc/ceph-csi-config/
+          name: ceph-csi-config
+        - mountPath: /tmp/csi/keys
+          name: keys-tmp-dir
+      - args:
+        - --csi-address=$(ADDRESS)
+        - --v=1
+        - --timeout=60s
+        - --leader-election=true
+        - --retry-interval-start=500ms
+        - --extra-create-metadata=true
+        - --feature-gates=HonorPVReclaimPolicy=true
+        - --prevent-volume-mode-conversion=true
+        env:
+        - name: ADDRESS
+          value: unix:///csi/csi-provisioner.sock
+        image: registry.k8s.io/sig-storage/csi-provisioner:v5.1.0
+        imagePullPolicy: IfNotPresent
+        name: csi-provisioner
+        resources: {}
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+      - args:
+        - --csi-address=$(ADDRESS)
+        - --v=1
+        - --timeout=60s
+        - --leader-election=true
+        - --extra-create-metadata=true
+        - --feature-gates=CSIVolumeGroupSnapshot=false
+        env:
+        - name: ADDRESS
+          value: unix:///csi/csi-provisioner.sock
+        image: registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0
+        imagePullPolicy: IfNotPresent
+        name: csi-snapshotter
+        resources: {}
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+      - args:
+        - --v=1
+        - --csi-address=$(ADDRESS)
+        - --timeout=60s
+        - --leader-election
+        - --retry-interval-start=500ms
+        - --handle-volume-inuse-error=false
+        - --feature-gates=RecoverVolumeExpansionFailure=true
+        env:
+        - name: ADDRESS
+          value: unix:///csi/csi-provisioner.sock
+        image: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
+        imagePullPolicy: IfNotPresent
+        name: csi-resizer
+        resources: {}
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+      - args:
+        - --type=liveness
+        - --endpoint=$(CSI_ENDPOINT)
+        - --metricsport=8081
+        - --metricspath=/metrics
+        - --polltime=60s
+        - --timeout=3s
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi-provisioner.sock
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        image: quay.io/cephcsi/cephcsi:v3.14.2
+        imagePullPolicy: IfNotPresent
+        name: liveness-prometheus
+        ports:
+        - containerPort: 8081
+          name: metrics
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+      hostNetwork: false
+      priorityClassName: system-cluster-critical
+      securityContext: {}
+      serviceAccountName: csi-cephfs-ceph-csi-cephfs-provisioner
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: socket-dir
+      - hostPath:
+          path: /sys
+        name: host-sys
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
+      - hostPath:
+          path: /dev
+        name: host-dev
+      - configMap:
+          name: ceph-config
+        name: ceph-config
+      - configMap:
+          name: ceph-csi-config
+        name: ceph-csi-config
+      - emptyDir:
+          medium: Memory
+        name: keys-tmp-dir
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    component: nodeplugin
+    heritage: Helm
+    release: csi-cephfs
+  name: csi-cephfs-ceph-csi-cephfs-nodeplugin
+  namespace: csi-cephfs
+spec:
+  selector:
+    matchLabels:
+      app: ceph-csi-cephfs
+      component: nodeplugin
+      release: csi-cephfs
+  template:
+    metadata:
+      labels:
+        app: ceph-csi-cephfs
+        chart: ceph-csi-cephfs-3.14.2
+        component: nodeplugin
+        heritage: Helm
+        release: csi-cephfs
+    spec:
+      containers:
+      - args:
+        - --nodeid=$(NODE_ID)
+        - --type=cephfs
+        - --nodeserver=true
+        - --pidlimit=-1
+        - --kernelmountoptions=
+        - --fusemountoptions=
+        - --endpoint=$(CSI_ENDPOINT)
+        - --v=5
+        - --drivername=$(DRIVER_NAME)
+        - --enable-read-affinity=false
+        - --logslowopinterval=30s
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: DRIVER_NAME
+          value: cephfs.csi.ceph.com
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi.sock
+        image: quay.io/cephcsi/cephcsi:v3.14.2
+        imagePullPolicy: IfNotPresent
+        name: csi-cephfsplugin
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+          privileged: true
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+        - mountPath: /var/lib/kubelet/pods
+          mountPropagation: Bidirectional
+          name: mountpoint-dir
+        - mountPath: /var/lib/kubelet/plugins
+          mountPropagation: Bidirectional
+          name: plugin-dir
+        - mountPath: /dev
+          name: host-dev
+        - mountPath: /run/mount
+          name: host-mount
+        - mountPath: /sys
+          name: host-sys
+        - mountPath: /etc/selinux
+          name: etc-selinux
+          readOnly: true
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /etc/ceph/
+          name: ceph-config
+        - mountPath: /etc/ceph-csi-config/
+          name: ceph-csi-config
+        - mountPath: /tmp/csi/keys
+          name: keys-tmp-dir
+        - mountPath: /csi/mountinfo
+          name: ceph-csi-mountinfo
+      - args:
+        - --v=5
+        - --csi-address=/csi/csi.sock
+        - --kubelet-registration-path=/var/lib/kubelet/plugins/cephfs.csi.ceph.com/csi.sock
+        env:
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0
+        imagePullPolicy: IfNotPresent
+        name: driver-registrar
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          privileged: true
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+        - mountPath: /registration
+          name: registration-dir
+      - args:
+        - --type=liveness
+        - --endpoint=$(CSI_ENDPOINT)
+        - --metricsport=8081
+        - --metricspath=/metrics
+        - --polltime=60s
+        - --timeout=3s
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi.sock
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        image: quay.io/cephcsi/cephcsi:v3.14.2
+        imagePullPolicy: IfNotPresent
+        name: liveness-prometheus
+        ports:
+        - containerPort: 8081
+          name: metrics
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          privileged: true
+        volumeMounts:
+        - mountPath: /csi
+          name: socket-dir
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      hostPID: true
+      priorityClassName: system-node-critical
+      securityContext: {}
+      serviceAccountName: csi-cephfs-ceph-csi-cephfs-nodeplugin
+      volumes:
+      - hostPath:
+          path: /var/lib/kubelet/plugins/cephfs.csi.ceph.com
+          type: DirectoryOrCreate
+        name: socket-dir
+      - hostPath:
+          path: /var/lib/kubelet/plugins_registry
+          type: Directory
+        name: registration-dir
+      - hostPath:
+          path: /var/lib/kubelet/pods
+          type: DirectoryOrCreate
+        name: mountpoint-dir
+      - hostPath:
+          path: /var/lib/kubelet/plugins
+          type: Directory
+        name: plugin-dir
+      - hostPath:
+          path: /sys
+        name: host-sys
+      - hostPath:
+          path: /etc/selinux
+        name: etc-selinux
+      - hostPath:
+          path: /run/mount
+        name: host-mount
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
+      - hostPath:
+          path: /dev
+        name: host-dev
+      - configMap:
+          name: ceph-config
+        name: ceph-config
+      - configMap:
+          name: ceph-csi-config
+        name: ceph-csi-config
+      - emptyDir:
+          medium: Memory
+        name: keys-tmp-dir
+      - hostPath:
+          path: /var/lib/kubelet/plugins/cephfs.csi.ceph.com/mountinfo
+          type: DirectoryOrCreate
+        name: ceph-csi-mountinfo
+  updateStrategy:
+    type: RollingUpdate
+---
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  labels:
+    app: ceph-csi-cephfs
+    chart: ceph-csi-cephfs-3.14.2
+    heritage: Helm
+    release: csi-cephfs
+  name: cephfs.csi.ceph.com
+spec:
+  attachRequired: false
+  fsGroupPolicy: File
+  podInfoOnMount: false
+  seLinuxMount: true

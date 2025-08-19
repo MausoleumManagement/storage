@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The CRDs for the external snapshotter are not bundled with the csi-cephfs helm chart
+# for now, we will add them here
+# https://github.com/kubernetes-csi/external-snapshotter
+# See https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md
+# for the // syntax kustomize uses for remote kustomization files
+resources:
+  - https://github.com/kubernetes-csi/external-snapshotter//client/config/crd?timeout=120&ref=release-8.3

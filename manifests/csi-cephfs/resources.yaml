@@ -23,7 +23,6 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace: csi-cephfs
   csi.storage.k8s.io/provisioner-secret-name: csi-cephfs-secret
   csi.storage.k8s.io/provisioner-secret-namespace: csi-cephfs
-  encrypted: "false"
   fsName: cephfs
 provisioner: cephfs.csi.ceph.com
 reclaimPolicy: Delete
@@ -291,16 +290,14 @@ subjects:
 ---
 apiVersion: v1
 data:
-  ceph.conf: |
-    [global]
-      auth_cluster_required = cephx
-      auth_service_required = cephx
-      auth_client_required = cephx
-
-      # ceph-fuse which uses libfuse2 by default has write buffer size of 2KiB
-      # adding 'fuse_big_writes = true' option by default to override this limit
-      # see https://github.com/ceph/ceph-csi/issues/1928
-      fuse_big_writes = true
+  ceph.conf: "[global]\n  auth_cluster_required = cephx\n  auth_service_required =
+    cephx\n  auth_client_required = cephx\n\n  # ceph-fuse which uses libfuse2 by
+    default has write buffer size of 2KiB\n  # adding 'fuse_big_writes = true' option
+    by default to override this limit\n  # see https://github.com/ceph/ceph-csi/issues/1928\n
+    \ fuse_big_writes = true\n  \n  # minimal configuration generated with `ceph config
+    generate-minimal-conf`\n  fsid = 94563514-dd45-48e9-80b0-ba2f058f6d30\n  mon_host
+    = [v2:192.168.9.20:3300/0,v1:192.168.9.20:6789/0] [v2:192.168.9.21:3300/0,v1:192.168.9.21:6789/0]
+    [v2:192.168.9.22:3300/0,v1:192.168.9.22:6789/0]\n"
   keyring: ""
 kind: ConfigMap
 metadata:
@@ -315,7 +312,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  config.json: '[{"cephFS":{"radosNamespace":"fsvolumens_nekropolis-csi-cephfs","subvolumeGroup":"k8s"},"clusterID":"94563514-dd45-48e9-80b0-ba2f058f6d30","monitors":["192.168.9.20","192.168.9.21","192.168.9.22"]}]'
+  config.json: '[{"cephFS":{"subvolumeGroup":"nekropolis-csi"},"clusterID":"94563514-dd45-48e9-80b0-ba2f058f6d30","monitors":["192.168.9.20","192.168.9.21","192.168.9.22"]}]'
 kind: ConfigMap
 metadata:
   labels:

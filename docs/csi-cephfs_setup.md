@@ -1,3 +1,10 @@
+## Reading Material
+- https://docs.ceph.com/en/reef/cephfs/createfs/
+- https://docs.ceph.com/en/latest/cephfs/client-auth/
+- https://github.com/ceph/ceph-csi/tree/devel/examples/cephfs
+- https://github.com/ceph/ceph-csi/blob/devel/docs/capabilities.md
+
+
 ## CephFS setup
 
 

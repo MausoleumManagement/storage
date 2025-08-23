@@ -1,11 +1,5 @@
 # Storage
 
-## Reading Material
-- https://docs.ceph.com/en/reef/cephfs/createfs/
-- https://docs.ceph.com/en/latest/cephfs/client-auth/
-- https://github.com/ceph/ceph-csi/tree/devel/examples/cephfs
-- https://github.com/ceph/ceph-csi/blob/devel/docs/capabilities.md
-
 This repo contains the deployments for various Container Storage Interfaces (CSIs). Their job is to make the various volumes we create as kubernetes resources actually appear in the respective backends.
 
 CSI plugins can either be in-tree (i.e. in the K8s source code) or out-of-tree (i.e. outside of the code and usually deployed using Kubernetes resources).
@@ -20,9 +14,7 @@ Here's a figure displaying this. It's from the [Openshift documentation](https:/
 
 The Openshift documentation (owned by Red Hat) is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
 
-## CSI-Components
-### ceph-csi
-Container Storage Interface for Ceph.
+## Cluster Wide CSI Components
 ### snapshot-controller
 Creates snapshots when users create `VolumeSnapshot` objects. The contents of those snapshots live in `VolumeSnapshotContent` objects, like PVs and PVCs.
 

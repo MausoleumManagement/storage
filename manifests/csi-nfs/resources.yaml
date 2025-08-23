@@ -10,7 +10,10 @@ metadata:
   labels:
     app.kubernetes.io/instance: csi-nfs
     app.kubernetes.io/name: csi-driver-nfs
-  name: nfs-externally-managed
+  name: nfs
+parameters:
+  server: wunderhort-nfs.irminsul
+  share: /wunderhort/nekropolis-csi-nfs
 provisioner: nfs.csi.k8s.io
 reclaimPolicy: Retain
 ---

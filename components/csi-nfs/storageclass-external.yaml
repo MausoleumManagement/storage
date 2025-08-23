@@ -1,0 +1,13 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  # we use this storageClass for preexisting nfs shares
+  # that do not need to be dynamically provisioned
+  name: nfs-externally-managed
+  labels:
+    app.kubernetes.io/instance: csi-nfs
+    app.kubernetes.io/name: csi-driver-nfs
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Retain
+allowVolumeExpansion: true

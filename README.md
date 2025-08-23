@@ -1,5 +1,9 @@
 # Storage
 
+## Reading Material
+
+- https://kubernetes-csi.github.io/docs/
+
 This repo contains the deployments for various Container Storage Interfaces (CSIs). Their job is to make the various volumes we create as kubernetes resources actually appear in the respective backends.
 
 CSI plugins can either be in-tree (i.e. in the K8s source code) or out-of-tree (i.e. outside of the code and usually deployed using Kubernetes resources).

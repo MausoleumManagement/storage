@@ -19,3 +19,4 @@ helmcharts:
     valuesFile: values.yaml
 resources:
   - namespace.yaml
+  - poddisruptionbudget.yaml

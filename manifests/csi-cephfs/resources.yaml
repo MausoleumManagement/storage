@@ -290,14 +290,20 @@ subjects:
 ---
 apiVersion: v1
 data:
-  ceph.conf: "[global]\n  auth_cluster_required = cephx\n  auth_service_required =
-    cephx\n  auth_client_required = cephx\n\n  # ceph-fuse which uses libfuse2 by
-    default has write buffer size of 2KiB\n  # adding 'fuse_big_writes = true' option
-    by default to override this limit\n  # see https://github.com/ceph/ceph-csi/issues/1928\n
-    \ fuse_big_writes = true\n  \n  # minimal configuration generated with `ceph config
-    generate-minimal-conf`\n  fsid = 94563514-dd45-48e9-80b0-ba2f058f6d30\n  mon_host
-    = [v2:192.168.9.20:3300/0,v1:192.168.9.20:6789/0] [v2:192.168.9.21:3300/0,v1:192.168.9.21:6789/0]
-    [v2:192.168.9.22:3300/0,v1:192.168.9.22:6789/0]\n"
+  ceph.conf: |
+    [global]
+      auth_cluster_required = cephx
+      auth_service_required = cephx
+      auth_client_required = cephx
+
+      # ceph-fuse which uses libfuse2 by default has write buffer size of 2KiB
+      # adding 'fuse_big_writes = true' option by default to override this limit
+      # see https://github.com/ceph/ceph-csi/issues/1928
+      fuse_big_writes = true
+
+      # minimal configuration generated with `ceph config generate-minimal-conf`
+      fsid = 94563514-dd45-48e9-80b0-ba2f058f6d30
+      mon_host = [v2:192.168.9.20:3300/0,v1:192.168.9.20:6789/0] [v2:192.168.9.21:3300/0,v1:192.168.9.21:6789/0] [v2:192.168.9.22:3300/0,v1:192.168.9.22:6789/0]
   keyring: ""
 kind: ConfigMap
 metadata:
@@ -394,7 +400,7 @@ metadata:
   name: csi-cephfs-ceph-csi-cephfs-provisioner
   namespace: csi-cephfs
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: ceph-csi-cephfs
@@ -413,6 +419,20 @@ spec:
         heritage: Helm
         release: csi-cephfs
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - ceph-csi-cephfs
+              - key: component
+                operator: In
+                values:
+                - provisioner
+            topologyKey: kubernetes.io/hostname
       containers:
       - args:
         - --nodeid=$(NODE_ID)
@@ -562,6 +582,19 @@ spec:
       - emptyDir:
           medium: Memory
         name: keys-tmp-dir
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: csi-cephfs-provisioner
+  namespace: csi-cephfs
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: ceph-csi-cephfs
+      component: provisioner
+      release: ceph-csi-cephfs
 ---
 apiVersion: apps/v1
 kind: DaemonSet

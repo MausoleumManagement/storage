@@ -3,7 +3,7 @@ rbac:
   leastPrivileges: true
 
 provisioner:
-  replicaCount: 1
+  replicaCount: 3
 
 # Configuration for the CSI to connect to the cluster
 # See: https://github.com/ceph/ceph-csi/blob/devel/examples/README.md

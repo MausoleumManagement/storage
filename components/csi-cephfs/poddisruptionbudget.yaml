@@ -2,8 +2,7 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: ceph-csi-cephfs-provisioner
-  namespace: ceph-csi-cephfs
+  name: csi-cephfs-provisioner
 spec:
   minAvailable: 2
   selector:
